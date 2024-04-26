@@ -3,6 +3,8 @@
 
 My website which hosts screenshots that i take using [ShareX](https://getsharex.com/)
 
+View example [here](https://callum.christmas/viewer.php?id=z7oe0)
+
 ## Admin Features
 
 - Sort by: Default, Size, Date
