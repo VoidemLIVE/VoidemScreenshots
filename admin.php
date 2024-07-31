@@ -71,6 +71,12 @@ function renderAdminContent() {
     $endIndex = min($startIndex + $perPage, $totalImages);
     $filesOnPage = array_slice($files, $startIndex, $perPage);
 
+    $totalSize = 0;
+    foreach ($filesOnPage as $file) {
+        $fileSize = filesize($file);
+        $totalSize += $fileSize;
+    }
+
     echo '
     <!DOCTYPE html>
     <html lang="en">
@@ -99,6 +105,8 @@ function renderAdminContent() {
                         <option value="date"'; if (isset($_GET['sort']) && $_GET['sort'] === 'date') { echo ' selected'; } echo '>Date Created</option>
                     </select>
                     <p class="text-gray-700 ml-4">Number of Images: <a class="font-bold">' . $totalImages . '</a></p>
+                    <p class="text-gray-700 ml-4">Total Size: <a class="font-bold">' . formatFileSize($totalSize) . '</a></p>
+                    <p class="text-gray-700 ml-4">Pages: <a class="font-bold">' . $totalPages . '</a></p>
                 </div>
                 <div class="flex items-center">
                     <form method="POST" action="">
@@ -139,19 +147,27 @@ function renderAdminContent() {
     echo '
             </div>
             <div class="flex justify-center mt-4">';
-    //page things
+    // page navigation
     if ($page > 1) {
-        echo '<a href="?page=' . ($page - 1) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">Previous</a>';
+        echo '<a href="?page=' . 1 . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">&lt;&lt;</a>';
+        echo '<a href="?page=' . ($page - 1) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">&lt;</a>';
     }
-    
-    for ($i = 1; $i <= $totalPages; $i++) {
-        $activeClass = $i === $page ? ' active-page' : '';
-        echo '<a href="?page=' . $i . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4' . $activeClass . '">' . $i . '</a>';
+
+    if ($page > 1) {
+        echo '<a href="?page=' . ($page - 1) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4">' . ($page - 1) . '</a>';
+    }
+
+    echo '<a href="?page=' . $page . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 active-page">' . $page . '</a>';
+
+    if ($page < $totalPages) {
+        echo '<a href="?page=' . ($page + 1) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4">' . ($page + 1) . '</a>';
     }
 
     if ($page < $totalPages) {
-        echo '<a href="?page=' . ($page + 1) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">Next</a>';
+        echo '<a href="?page=' . ($page + 1) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">&gt;</a>';
+        echo '<a href="?page=' . ($totalPages) . '&sort=' . (isset($_GET['sort']) ? $_GET['sort'] : 'default') . '" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">&gt;&gt;</a>';
     }
+
     echo '
             </div>
         </div>
@@ -167,9 +183,6 @@ function renderAdminContent() {
     </body>
     </html>';
 }
-
-
-
 
 function formatFileSize($fileSize) {
     if ($fileSize >= 1024 * 1024) {
